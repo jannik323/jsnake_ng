@@ -152,7 +152,7 @@ class snake{
             this.dir_v += 0.15;
             this.speed *= 1 + Math.abs(this.dir_v)/5;
         }
-        if(KEYS[" "] && this.speedboost >10 ) {
+        if((KEYS[" "] && this.speedboost >10 ) || touch=== "boost" ) {
             this.speed *= 1.05;
             this.speedboost -= 10;
             this.color = "darkgreen";
@@ -302,10 +302,10 @@ addEventListener("keyup", e => {
     KEYS[e.key] = false;
 });
 
-addEventListener("mousedown", e =>{
+addEventListener("touchstart", e =>{
 
-    
-if (e.clientX > canvas.width/2){
+if(e.touches.length >1){touch = "boost"}  
+if (e.touches[0].clientX > canvas.width/2){
 touch = "right";
 }else{
 touch = "left";
@@ -315,6 +315,6 @@ touch = "left";
 
 })
 
-addEventListener("mouseup", () =>{
+addEventListener("touchend", () =>{
     touch = "none";
 })
