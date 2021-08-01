@@ -23,6 +23,7 @@ class food{
         this.y = y;
         this.size = size;
         this.color = color;
+        this.randomloc();
 
     }
 
@@ -160,7 +161,11 @@ class snake{
         
         
 
-        if(this.x < 0 || this.y < 0 || this.y > canvas.height || this.x > canvas.width){this.dir += Math.PI}
+        if(this.x < 0){this.x = canvas.width}
+        if(this.x > canvas.width){this.x = 0}
+        if(this.y < 0){this.y = canvas.height}
+        if(this.y > canvas.height){this.y = 0}
+            
         
     
         if (FOODS.length !== 0){ 
@@ -168,18 +173,36 @@ class snake{
             FOODS.forEach((v,i)=>{
 
                 let fooddistance = distance(this.x,v.x,this.y,v.y);
-                if(fooddistance < this.size+v.size)
-                {
+                if(fooddistance < this.size+v.size){
                     v.randomloc();
                     this.snakelength += 1
-
                 }  
-            
+            })
+        }
+
+        if (BODIES.length !== 0){ 
+
+            BODIES.forEach((v,i)=>{
+
+                if(i !==0){
+                let bodydistance = distance(this.x,v.x,this.y,v.y);
+                if (bodydistance < this.size+v.size){
+                    
+                    window.location.reload(true)
+
+                }
+                }
 
 
             })
-            
+
+
+
         }
+        
+
+
+
 
     }
 
@@ -206,7 +229,6 @@ class snake{
         ctx.strokeText( "Speed : "+this.speed.toFixed(2), 0, 10);
         ctx.strokeText("Length : "+Math.round(this.snakelength), 0, 20);
         ctx.strokeText("Boost : "+Math.round(this.speedboost), 0, 30);
-        ctx.strokeText("POS LE : "+this.POSITIONS.length, 0, 40);
 
     }
 
@@ -218,8 +240,9 @@ class snake{
 
 const snake1 = new snake(canvas.width/2,canvas.height/2,0,0.5,10)
 const food1 = new food(0,0,5,"red");
+const food2 = new food(0,0,5,"red");
 FOODS.push(food1);
-food1.randomloc();
+FOODS.push(food2);
 
 // game loop 
 
@@ -240,15 +263,10 @@ function main(currentTime){
 
 
 function update(){
-snake1.update();
-FOODS.forEach((v,i)=>{v.update(i);})
-BODIES.forEach((v,i)=>{v.update(i);})
 
 if(snake1.snakelength !== BODIES.length){
-  
-
     if(snake1.snakelength === 1){
-        const new_body = new body(100,100,10,"lightgreen",snake1);
+        const new_body = new body(0,0,10,"lightgreen",snake1);
         BODIES.push(new_body);
     }else{
         
@@ -256,14 +274,16 @@ if(snake1.snakelength !== BODIES.length){
         snake1.POSITIONS = snake1.POSITIONS.slice(snake1.POSITIONS.length-delI,snake1.POSITIONS.length);
         
         
-        const new_body = new body(100,100,10,"lightgreen",BODIES[BODIES.length-1]);
+        const new_body = new body(0,0,10,"lightgreen",BODIES[BODIES.length-1]);
         console.log(BODIES[BODIES.length-1],delI);
         BODIES.push(new_body);
         
     }
-    
-    
 }
+
+snake1.update();
+FOODS.forEach((v,i)=>{v.update(i);})
+BODIES.forEach((v,i)=>{v.update(i);})
 
 }
 
@@ -304,6 +324,7 @@ addEventListener("keyup", e => {
 
 addEventListener("touchstart", e =>{
 
+    
 if(e.touches.length >1){touch = "boost"}else{
 if (e.touches[0].clientX > canvas.width/2){
 touch = "right";
