@@ -10,6 +10,7 @@ const KEYS = {};
 const FOODS = [];
 const BODIES = [];
 
+let touch = "none";
 
 
 // food class
@@ -113,7 +114,7 @@ class snake{
         this.size = size;
         this.snakelength = 0;
         this.speedboost = 300;
-        this.color = "blue";
+        this.color = "green";
         this.POSITIONS = []; 
         this.bodypos = 0;       
 
@@ -121,22 +122,16 @@ class snake{
 
     update(){
 
-        if(this.POSITIONS.length > 0){ if (this.x.toFixed(2) !== this.POSITIONS[this.POSITIONS.length-1].x && this.y.toFixed(2) !== this.POSITIONS[this.POSITIONS.length-1].y ){
-        this.POSITIONS.push({x:this.x.toFixed(2),y:this.y.toFixed(2)});
-        // console.log(this.POSITIONS.length);
-        } }{
-        this.POSITIONS.push({x:this.x.toFixed(2),y:this.y.toFixed(2)}); 
-        }
-
         
-
+        this.POSITIONS.push({x:this.x,y:this.y}); 
+        
 
         this.x += Math.cos(this.dir)*this.speed;
         this.y += Math.sin(this.dir)*this.speed;
         this.dir += this.dir_v;
         this.speed *= 0.9;
         this.dir_v *= 0.65;
-        this.color = "lightblue";
+        this.color = "green";
         if(this.speedboost < 300){this.speedboost += 1;}
         
 
@@ -148,19 +143,19 @@ class snake{
         //     this.speed -= this.acc*1.1;
         // }
 
-        if(KEYS["a"]){
+        if(KEYS["a"] || touch === "left"){
             this.dir_v -= 0.15;
             this.speed *= 1 + Math.abs(this.dir_v)/5;
 
         }
-        if(KEYS["d"]){
+        if(KEYS["d"]|| touch === "right"){
             this.dir_v += 0.15;
             this.speed *= 1 + Math.abs(this.dir_v)/5;
         }
         if(KEYS[" "] && this.speedboost >10 ) {
             this.speed *= 1.05;
             this.speedboost -= 10;
-            this.color = "white";
+            this.color = "darkgreen";
         }
         
         
@@ -253,7 +248,7 @@ if(snake1.snakelength !== BODIES.length){
   
 
     if(snake1.snakelength === 1){
-        const new_body = new body(100,100,10,"Blue",snake1);
+        const new_body = new body(100,100,10,"lightgreen",snake1);
         BODIES.push(new_body);
     }else{
         
@@ -261,7 +256,7 @@ if(snake1.snakelength !== BODIES.length){
         snake1.POSITIONS = snake1.POSITIONS.slice(snake1.POSITIONS.length-delI,snake1.POSITIONS.length);
         
         
-        const new_body = new body(100,100,10,"Blue",BODIES[BODIES.length-1]);
+        const new_body = new body(100,100,10,"lightgreen",BODIES[BODIES.length-1]);
         console.log(BODIES[BODIES.length-1],delI);
         BODIES.push(new_body);
         
@@ -306,3 +301,20 @@ addEventListener("keydown", e => {
 addEventListener("keyup", e => {
     KEYS[e.key] = false;
 });
+
+addEventListener("mousedown", e =>{
+
+    
+if (e.clientX > canvas.width/2){
+touch = "right";
+}else{
+touch = "left";
+
+}
+
+
+})
+
+addEventListener("mouseup", () =>{
+    touch = "none";
+})
