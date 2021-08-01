@@ -304,12 +304,12 @@ addEventListener("keyup", e => {
 
 addEventListener("touchstart", e =>{
 
-if(e.touches.length >1){touch = "boost"}  
+if(e.touches.length >1){touch = "boost"}else{
 if (e.touches[0].clientX > canvas.width/2){
 touch = "right";
 }else{
 touch = "left";
-
+}
 }
 
 
