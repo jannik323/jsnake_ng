@@ -12,17 +12,22 @@ const BODIES = [];
 
 let touch = "none";
 
+const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow"]
+const SPAWNFOOD = ["grow","grow","randomgrow","randomgrow"];
+
+let menu = false;
+
 
 // food class
 
 class food{
 
-    constructor(x,y,size,color){
+    constructor(x,y,type){
 
         this.x = x;
         this.y = y;
-        this.size = size;
-        this.color = color;
+        this.type = type;
+        this.assigntype();
         this.randomloc();
 
     }
@@ -48,6 +53,57 @@ class food{
 
         this.x = randomrange(this.size,canvas.width-this.size);
         this.y = randomrange(this.size,canvas.height-this.size);
+    }
+
+    randomtype(){
+
+        this.type = FOODTYPES[randomrange(0,FOODTYPES.length-1)];
+        this.assigntype();
+        this.randomloc();
+    }
+
+    assigntype(){
+
+        switch(this.type){
+            case "randomgrow":
+            case "grow":
+                this.size = 8;
+                this.color = "red";
+                break;
+            case "boost":
+                this.size = 7;
+                this.color = "blue";
+                break;
+            case "ghost":
+                this.size = 10;
+                this.color = "grey";
+                break;
+            case "speed":
+                this.size = 6;
+                this.color = "yellow";
+                break;
+            case "nospeed":
+                this.size = 11;
+                this.color = "#6a6a16";
+                break;
+            case "bigbutt":
+                this.size = 12;
+                this.color = "brown";
+                break;
+            case "tempgrow":
+                this.size = 8;
+                this.color = "darkred";
+                break;
+            case "spawn":
+                this.size = 15;
+                this.color ="#004a00";
+                break;
+            
+            default:
+                this.size = 40;
+                this.color = "pink";
+                break;
+        }
     }
 
 }
@@ -95,6 +151,11 @@ class body{
 
     }
 
+    shrinkToParent(){
+
+        this.size = this.parent.size *0.99;
+    }
+
 
 
 }
@@ -115,9 +176,11 @@ class snake{
         this.size = size;
         this.snakelength = 0;
         this.speedboost = 300;
-        this.color = "green";
+        this.colordefault = "green";
+        this.color = this.colordefault;
         this.POSITIONS = []; 
-        this.bodypos = 0;       
+        this.bodypos = 0;  
+        this.nocolbod = false;     
 
     }
 
@@ -131,8 +194,8 @@ class snake{
         this.y += Math.sin(this.dir)*this.speed;
         this.dir += this.dir_v;
         this.speed *= 0.9;
-        this.dir_v *= 0.65;
-        this.color = "green";
+        this.dir_v *= 0.84;
+        this.color = this.colordefault;
         if(this.speedboost < 300){this.speedboost += 1;}
         
 
@@ -145,13 +208,15 @@ class snake{
         // }
 
         if(KEYS["a"] || touch === "left"){
-            this.dir_v -= 0.15;
-            this.speed *= 1 + Math.abs(this.dir_v)/5;
+            if(this.dir_v >0){this.dir_v -= 0.1}
+            this.dir_v -= 0.05;
+            this.speed *= 1 + Math.abs(this.dir_v)/8;
 
         }
         if(KEYS["d"]|| touch === "right"){
-            this.dir_v += 0.15;
-            this.speed *= 1 + Math.abs(this.dir_v)/5;
+            if(this.dir_v <0){this.dir_v += 0.1}
+            this.dir_v += 0.05;
+            this.speed *= 1 + Math.abs(this.dir_v)/8;
         }
         if((KEYS[" "] && this.speedboost >10 ) || touch=== "boost" ) {
             this.speed *= 1.05;
@@ -167,6 +232,8 @@ class snake{
         if(this.y > canvas.height){this.y = 0}
             
         
+
+        // food detection
     
         if (FOODS.length !== 0){ 
 
@@ -174,13 +241,79 @@ class snake{
 
                 let fooddistance = distance(this.x,v.x,this.y,v.y);
                 if(fooddistance < this.size+v.size){
-                    v.randomloc();
-                    this.snakelength += 1
+                    switch(v.type){
+
+                        case "grow":
+                            v.randomloc();
+                            this.snakelength += 1;
+                            break;
+                        case "randomgrow":
+                            v.randomtype()
+                            this.snakelength += 1;
+                            break;
+                        case "boost":
+                            v.randomtype()
+                            this.speedboost +=300;
+                            break;
+                        case "ghost":
+                            v.randomtype()
+                            this.nocolbod = true;
+                            this.colordefault = "grey";
+                            setTimeout(()=>{
+                                this.nocolbod = false;
+                                this.colordefault = "green";
+                                
+                            },10000)
+                            break;
+                        case "speed":
+                            v.randomtype()
+                            this.acc += 1;
+                            this.colordefault = "red";
+                            setTimeout(()=>{
+                                this.acc -= 1;
+                                this.colordefault = "green";
+                                
+                            },10000)
+                            break;
+                        case "nospeed":
+                            v.randomtype()
+                            this.acc /= 2;
+                            this.colordefault = "#6a6a16";
+                            setTimeout(()=>{
+                                this.acc *= 2;
+                                this.colordefault = "green";
+                                
+                            },10000)
+                            break;
+                        case "bigbutt":
+                            v.randomtype()
+                            BODIES[BODIES.length-1].size += 4;
+                            break;
+                        case "tempgrow":
+                            FOODS.splice(i,1);
+                            this.snakelength += 1;
+                            break;
+                        case "spawn":
+                            v.randomtype()
+                            let spawnamount = 5;
+                            for(let i = 0;i<spawnamount; i++){
+                                const new_food = new food(0,0,"tempgrow");
+                                FOODS.push(new_food);
+                            }
+
+
+                        default:
+                        console.log("wtf are you eating snake?");
+                        break;
+                }
+
                 }  
             })
         }
 
-        if (BODIES.length !== 0){ 
+        // body detection
+
+        if (BODIES.length !== 0 && !this.nocolbod ){ 
 
             BODIES.forEach((v,i)=>{
 
@@ -226,9 +359,9 @@ class snake{
 
 
         ctx.strokeStyle = "black";
-        ctx.strokeText( "Speed : "+this.speed.toFixed(2), 0, 10);
-        ctx.strokeText("Length : "+Math.round(this.snakelength), 0, 20);
-        ctx.strokeText("Boost : "+Math.round(this.speedboost), 0, 30);
+        ctx.strokeText( "Speed : "+this.speed.toFixed(2), 5, 10);
+        ctx.strokeText("Length : "+Math.round(this.snakelength), 5, 30);
+        ctx.strokeText("Boost : "+Math.round(this.speedboost), 5, 50);
 
     }
 
@@ -239,10 +372,11 @@ class snake{
 // make snake , food , body
 
 const snake1 = new snake(canvas.width/2,canvas.height/2,0,0.5,10)
-const food1 = new food(0,0,5,"red");
-const food2 = new food(0,0,5,"red");
-FOODS.push(food1);
-FOODS.push(food2);
+
+for(let i = 0; i< SPAWNFOOD.length; i++){
+const new_food = new food(0,0,SPAWNFOOD[i]);
+FOODS.push(new_food);
+}
 
 // game loop 
 
@@ -250,6 +384,7 @@ window.requestAnimationFrame(main);
 
 let lastRenderTime = 0;
 let GameSpeed = 30;
+let lastGameSpeed = 30;
 
 function main(currentTime){
     window.requestAnimationFrame(main);
@@ -267,14 +402,16 @@ function update(){
 if(snake1.snakelength !== BODIES.length){
     if(snake1.snakelength === 1){
         const new_body = new body(0,0,10,"lightgreen",snake1);
+        new_body.shrinkToParent();
         BODIES.push(new_body);
     }else{
         
-        let delI = BODIES[BODIES.length-1].bodypos+BODIES[BODIES.length-1].bodypos;
+        let delI = BODIES[BODIES.length-1].bodypos+ (BODIES[BODIES.length-1].bodypos)*2;
         snake1.POSITIONS = snake1.POSITIONS.slice(snake1.POSITIONS.length-delI,snake1.POSITIONS.length);
         
         
         const new_body = new body(0,0,10,"lightgreen",BODIES[BODIES.length-1]);
+        new_body.shrinkToParent();
         console.log(BODIES[BODIES.length-1],delI);
         BODIES.push(new_body);
         
@@ -310,6 +447,23 @@ return Math.sqrt(((x2-x1)**2)+((y2-y1)**2));
 
 function randomrange(min, max) { 
     return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+
+function togglePause(){
+    let menudiv = document.getElementById("pausemenu");
+    if(GameSpeed === 0){
+        GameSpeed = lastGameSpeed; 
+        menu = false;
+        menudiv.style.display = "none";
+
+    }else{
+        GameSpeed = 0; 
+        menu = true;
+        menudiv.style.display = "flex";
+
+    }
+
 }
 
 

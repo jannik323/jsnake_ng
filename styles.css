@@ -4,7 +4,27 @@ body, html {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 canvas {
     position:absolute;
+}
+
+button.menubutton{
+
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    opacity: 0.5;
+
+}
+
+div.pausemenu{
+
+    display: none;
+    position: absolute;
+    opacity: 0.5;
+
 }
