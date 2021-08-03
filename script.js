@@ -11,6 +11,7 @@ const FOODS = [];
 const BODIES = [];
 
 let touch = "none";
+let debug = false;
 
 const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow"]
 const SPAWNFOOD = ["grow","grow","randomgrow","randomgrow"];
@@ -112,17 +113,22 @@ class food{
 
 class body{
 
-    constructor(x,y,size,color,parent){
+
+    constructor(x,y,size,color,parent,visbile){
 
         this.x = x;
         this.y = y;
-        this.size = size;
+        this.sizedefault = size;
+        this.size = this.sizedefault;
         this.color = color;
         this.parent = parent;
         this.bodypos = 0;
+        this.eating = false;
+        this.delayeat = false;
+        this.visbile = visbile
     }
 
-    update(){
+    update(bodyI = 0){
 
         for(let i= snake1.POSITIONS.length-1-this.parent.bodypos; i>0 ;i--){
 
@@ -130,23 +136,44 @@ class body{
             this.y = snake1.POSITIONS[i].y;
             if(distance(this.x,this.parent.x,this.y,this.parent.y) > this.size+this.parent.size){
                 this.bodypos = snake1.POSITIONS.length-1-i;
-                // snake1.POSITIONS.shift();
                 break;
             }
 
         }
+
+        // eating logic
+        
+        if(this.parent.eating === true){
+            this.parent.eating = false;
+            if(bodyI !== BODIES.length-1){
+                this.delayeat = true;
+                setTimeout(() => {
+                    this.eating = true;
+                    this.delayeat = false;
+                    
+                }, 100);
+        }else{this.visbile = true;}}
+
+        if(this.delayeat){
+            this.size = this.sizedefault +5;
+        }else{
+            this.size = this.sizedefault;
+        }
+
+
 
     }
 
 
     render(){
 
+        if(this.visbile){
         ctx.beginPath();
         ctx.strokeStyle = "black";
         ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0, 2 * Math.PI);
         ctx.fillStyle = this.color ;
         ctx.fill();
-        ctx.stroke(); 
+        ctx.stroke(); }
         
 
     }
@@ -180,7 +207,8 @@ class snake{
         this.color = this.colordefault;
         this.POSITIONS = []; 
         this.bodypos = 0;  
-        this.nocolbod = false;     
+        this.nocolbod = false;    
+        this.eating = false;
 
     }
 
@@ -332,8 +360,16 @@ class snake{
 
 
         }
-        
 
+        //pos size detection
+
+
+        if(BODIES.length>0){
+        let bodysize = BODIES[BODIES.length-1].bodypos;
+        if(this.POSITIONS.length > bodysize*2){
+            snake1.POSITIONS = snake1.POSITIONS.slice(bodysize/2,snake1.POSITIONS.length);
+        }}
+        
 
 
 
@@ -400,22 +436,17 @@ function main(currentTime){
 function update(){
 
 if(snake1.snakelength !== BODIES.length){
-    if(snake1.snakelength === 1){
-        const new_body = new body(0,0,10,"lightgreen",snake1);
-        new_body.shrinkToParent();
+
+    if(snake1.snakelength < 2){
+
+        const new_body = new body(0,0,10,"lightgreen",snake1,true)
         BODIES.push(new_body);
+        new_body.shrinkToParent();
+
     }else{
-        
-        let delI = BODIES[BODIES.length-1].bodypos+ (BODIES[BODIES.length-1].bodypos)*2;
-        snake1.POSITIONS = snake1.POSITIONS.slice(snake1.POSITIONS.length-delI,snake1.POSITIONS.length);
-        
-        
-        const new_body = new body(0,0,10,"lightgreen",BODIES[BODIES.length-1]);
-        new_body.shrinkToParent();
-        console.log(BODIES[BODIES.length-1],delI);
-        BODIES.push(new_body);
-        
-    }
+        addbody(false);
+        snake1.eating = true;}
+    
 }
 
 snake1.update();
@@ -433,6 +464,19 @@ FOODS.forEach((v)=>{v.render();})
 BODIES.forEach((v)=>{v.render();})
 
 
+if(debug){
+ctx.beginPath();
+snake1.POSITIONS.forEach((v,i)=>{
+        if (i === 0){
+            ctx.moveTo(v.x,v.y);
+        }else{
+            ctx.lineTo(v.x,v.y);
+        }
+
+
+})
+ctx.stroke()}
+
 }
 
 //distance
@@ -440,6 +484,16 @@ BODIES.forEach((v)=>{v.render();})
 function distance(x1,x2,y1,y2){
 
 return Math.sqrt(((x2-x1)**2)+((y2-y1)**2));
+
+}
+
+//add body
+
+function addbody(visbile){
+
+    const new_body = new body(0,0,10,"lightgreen",BODIES[BODIES.length-1],visbile);
+    new_body.shrinkToParent();
+    BODIES.push(new_body);
 
 }
 
@@ -472,22 +526,34 @@ addEventListener("keydown", e => {
     KEYS[e.key] = true;
 });
 
+addEventListener("keypress",e=>{
+    switch(e.key){
+        case "p":
+            togglePause();
+            break;
+        case "j":
+            if(debug){
+                debug= false;
+            }else{
+                debug = true;
+            }
+        default:
+            break;
+    }
+
+})
+
 addEventListener("keyup", e => {
     KEYS[e.key] = false;
 });
 
-addEventListener("touchstart", e =>{
-
-    
+addEventListener("touchstart", e =>{    
 if(e.touches.length >1){touch = "boost"}else{
 if (e.touches[0].clientX > canvas.width/2){
 touch = "right";
 }else{
 touch = "left";
-}
-}
-
-
+}}
 })
 
 addEventListener("touchend", () =>{

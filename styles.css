@@ -7,6 +7,7 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: monospace
 }
 canvas {
     position:absolute;
@@ -21,10 +22,48 @@ button.menubutton{
 
 }
 
+button.X{
+
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+button.menukeybindbtn{
+    margin-top: 1rem;
+    margin-left: 2rem;
+    width: 33%;
+    min-width: fit-content;
+}
+
+
+button{
+    border: 0.25rem ridge black;
+    
+}
+button:hover{
+
+    background-color: gray;
+}
+
+
 div.pausemenu{
 
     display: none;
     position: absolute;
-    opacity: 0.5;
+    opacity: 0.8;
+    flex-direction: column;
+    width: 50%;
+    height: 50%;
+    border: 1rem ridge black;
+    padding: 1rem;
+    background-color: white;
+
+}
+
+div h1{
+    display: block;
+    margin-top: 1rem;
+    align-self: center;
 
 }
