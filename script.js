@@ -13,6 +13,36 @@ const BODIES = [];
 let touch = "none";
 let debug = false;
 
+const KEYBINDS = {
+
+    Left:["a"],
+    Right:["d"],
+    Boost:["w"],   
+
+
+
+
+}
+ // make butttons for keybinds in menu
+
+for(let action in KEYBINDS){
+    let parent = document.getElementById('keybindmenu');
+    let div = document.createElement('div');
+    div.innerHTML = action + ": ";
+    div.value = action ;
+    div.classList.add("Keybinddiv");
+    parent.appendChild(div);
+    let button = document.createElement('button');
+    button.innerHTML = KEYBINDS[action][0];
+    button.value = 0 ;
+    button.classList.add("menubtn");
+    button.addEventListener("click", ()=>{setkeybindbtn(button)});
+    div.appendChild(button);
+
+    // typeoption.value = v.name;
+
+}
+
 const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow"]
 const SPAWNFOOD = ["grow","grow","randomgrow","randomgrow"];
 
@@ -84,7 +114,7 @@ class food{
                 this.color = "yellow";
                 break;
             case "nospeed":
-                this.size = 11;
+                this.size = 6;
                 this.color = "#6a6a16";
                 break;
             case "bigbutt":
@@ -155,11 +185,12 @@ class body{
         }else{this.visbile = true;}}
 
         if(this.delayeat){
-            this.size = this.sizedefault +5;
+            this.size = this.sizedefault +2;
         }else{
             this.size = this.sizedefault;
         }
 
+        if(bodyI !== BODIES.length-1 && !this.visbile ){this.visbile = true}
 
 
     }
@@ -225,29 +256,23 @@ class snake{
         this.dir_v *= 0.84;
         this.color = this.colordefault;
         if(this.speedboost < 300){this.speedboost += 1;}
-        
+        this.speed += this.acc;
 
-        // if(KEYS["w"]){
-            this.speed += this.acc;
-        // }
 
-        // if(KEYS["s"]){
-        //     this.speed -= this.acc*1.1;
-        // }
-
-        if(KEYS["a"] || touch === "left"){
-            if(this.dir_v >0){this.dir_v -= 0.1}
+        if( KEYBINDS["Left"].some(keybindcheck) || touch === "left"){
             this.dir_v -= 0.05;
             this.speed *= 1 + Math.abs(this.dir_v)/8;
-
         }
-        if(KEYS["d"]|| touch === "right"){
-            if(this.dir_v <0){this.dir_v += 0.1}
+
+                        // if(this.dir_v <0){this.dir_v += 0.1}
+
+        if( KEYBINDS["Right"].some(keybindcheck) || touch === "right" ){
             this.dir_v += 0.05;
             this.speed *= 1 + Math.abs(this.dir_v)/8;
         }
-        if((KEYS[" "] && this.speedboost >10 ) || touch=== "boost" ) {
-            this.speed *= 1.05;
+
+        if( KEYBINDS["Boost"].some(keybindcheck) && this.speedboost >10 || touch=== "boost" && this.speedboost >10 ){
+            this.speed *= 1.03;
             this.speedboost -= 10;
             this.color = "darkgreen";
         }
@@ -295,10 +320,10 @@ class snake{
                             break;
                         case "speed":
                             v.randomtype()
-                            this.acc += 1;
+                            this.acc *=2;
                             this.colordefault = "red";
                             setTimeout(()=>{
-                                this.acc -= 1;
+                                this.acc /= 2;
                                 this.colordefault = "green";
                                 
                             },10000)
@@ -396,8 +421,13 @@ class snake{
 
         ctx.strokeStyle = "black";
         ctx.strokeText( "Speed : "+this.speed.toFixed(2), 5, 10);
-        ctx.strokeText("Length : "+Math.round(this.snakelength), 5, 30);
         ctx.strokeText("Boost : "+Math.round(this.speedboost), 5, 50);
+        ctx.strokeText("Length : "+Math.round(this.snakelength), 5, 30);
+        if(debug){
+            ctx.strokeText("dirv : "+this.dir_v, 5, 70);
+            ctx.strokeText("POS : "+this.POSITIONS.length, 5, 90);
+            ctx.strokeText("nocolbod : "+ this.nocolbod, 5, 110);
+        }
 
     }
 
@@ -506,6 +536,10 @@ function randomrange(min, max) {
 
 function togglePause(){
     let menudiv = document.getElementById("pausemenu");
+
+    let keybind = document.getElementById("keybindmenu");
+    keybind.style.display = "none";
+
     if(GameSpeed === 0){
         GameSpeed = lastGameSpeed; 
         menu = false;
@@ -518,7 +552,51 @@ function togglePause(){
 
     }
 
+    
+
 }
+
+function toggledebug(){
+
+    if(debug){
+        debug= false;
+    }else{
+        debug = true;
+    }
+}
+
+function toggleKeybind(){
+
+    let keybind = document.getElementById("keybindmenu");
+    if(keybind.style.display==="flex"){
+        keybind.style.display = "none";
+    }else{
+        keybind.style.display = "flex";
+
+    }
+}
+
+
+// check if is keybind
+
+function keybindcheck(key){return KEYS[key]}
+
+// setkeybindbtn
+
+function setkeybindbtn(btn){
+    btn.addEventListener("keypress",e=>{
+        btn.innerHTML  = e.key ;
+        KEYBINDS[btn.parentElement.value] = [];
+        KEYBINDS[btn.parentElement.value].push(e.key );
+    });
+    
+    if(btn.innerHTML = " "){
+        btn.innerHTML = "spacebar";
+    }
+    
+}
+
+
 
 
 addEventListener("keydown", e => {
@@ -532,11 +610,7 @@ addEventListener("keypress",e=>{
             togglePause();
             break;
         case "j":
-            if(debug){
-                debug= false;
-            }else{
-                debug = true;
-            }
+            toggledebug();
         default:
             break;
     }

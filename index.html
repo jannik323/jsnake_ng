@@ -19,10 +19,23 @@
 
 <div id="pausemenu" class="pausemenu"> 
 
-<h1>Pause Menu </h1>
+<h1> Menu </h1>
 <button class="X" onclick=" togglePause();">X</button>
-<button class="menukeybindbtn">Change Keybinds</button>
+<button class="menubtn" onclick=" toggleKeybind();">Change Keybinds</button>
+<button class="menubtn" onclick=" toggledebug(); render();" >Toggle Debug Mode</button>
+
+<button class="menubtn" onclick="snake1.acc = 2" >Crazy Mode</button>
+
 </div>
+
+<div id="keybindmenu" class="keybindmenu"> 
+
+    <h1>Keybind Menu </h1>
+    <button class="X" onclick=" toggleKeybind();">X</button>
+
+
+    </div>
+
 </body>
 
 <script src="script.js" defer></script>
