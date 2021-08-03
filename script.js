@@ -584,15 +584,13 @@ function keybindcheck(key){return KEYS[key]}
 // setkeybindbtn
 
 function setkeybindbtn(btn){
+    btn.innerHTML = "Press a Key"
     btn.addEventListener("keypress",e=>{
         btn.innerHTML  = e.key ;
         KEYBINDS[btn.parentElement.value] = [];
         KEYBINDS[btn.parentElement.value].push(e.key );
     });
     
-    if(btn.innerHTML = " "){
-        btn.innerHTML = "spacebar";
-    }
     
 }
 
