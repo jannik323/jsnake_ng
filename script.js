@@ -13,6 +13,8 @@ const BODIES = [];
 let touch = "none";
 let debug = false;
 
+const PI = Math.PI;
+
 const KEYBINDS = {
 
     Left:["a"],
@@ -44,7 +46,9 @@ for(let action in KEYBINDS){
 }
 
 const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow"]
-const SPAWNFOOD = ["grow","grow","randomgrow","randomgrow"];
+const SPAWNFOOD = ["grow","grow","grow","grow","randomgrow","randomgrow","randomgrow"];
+
+const POWERUPS = [];
 
 let menu = false;
 
@@ -73,7 +77,7 @@ class food{
 
         ctx.beginPath();
         ctx.strokeStyle = "black";
-        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0, 2 * Math.PI);
+        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0, 2 * PI);
         ctx.fillStyle = this.color ;
         ctx.fill();
         ctx.stroke(); 
@@ -166,7 +170,7 @@ class body{
 
             this.x = snake1.POSITIONS[i].x;
             this.y = snake1.POSITIONS[i].y;
-            this.dir = snake1.POSITIONS[i].dir + Math.PI/2;
+            this.dir = snake1.POSITIONS[i].dir + PI/2;
             if(distance(this.x,this.parent.x,this.y,this.parent.y) > this.size+this.parent.size){
                 this.bodypos = snake1.POSITIONS.length-1-i;
                 break;
@@ -214,8 +218,8 @@ class body{
         ctx.strokeStyle = "black";
 
         if(BODIES.length>0 && end){
-            ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir ,this.dir + Math.PI)}else{
-            ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,Math.PI*2)
+            ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir ,this.dir + PI)}else{
+            ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,PI*2)
             }
 
         ctx.fillStyle = this.color ;
@@ -283,14 +287,14 @@ class snake{
 
         if( KEYBINDS["Left"].some(keybindcheck) || touch === "left"){
             this.dir_v -= 0.05;
-            this.speed *= 1 + Math.abs(this.dir_v)/8;
+            this.speed *= 1 + Math.abs(this.dir_v)/5;
         }
 
                         // if(this.dir_v <0){this.dir_v += 0.1}
 
         if( KEYBINDS["Right"].some(keybindcheck) || touch === "right" ){
             this.dir_v += 0.05;
-            this.speed *= 1 + Math.abs(this.dir_v)/8;
+            this.speed *= 1 + Math.abs(this.dir_v)/5;
         }
 
         if( KEYBINDS["Boost"].some(keybindcheck) && this.speedboost >10 || touch=== "boost" && this.speedboost >10 ){
@@ -330,32 +334,34 @@ class snake{
                         case "ghost":
                             v.randomtype()
                             this.nocolbod = true;
-                            this.colordefault = "grey";
+                            POWERUPS.push("Ghost");
                             setTimeout(()=>{
                                 this.nocolbod = false;
-                                this.colordefault = "green";
-                                
+                                let delI = POWERUPS.findIndex((v)=>{v === "Ghost"});
+                                POWERUPS.splice(delI,1);                                
                             },10000)
                             break;
                         case "speed":
                             v.randomtype()
                             this.acc *=1.5;
-                            this.colordefault = "red";
+                            POWERUPS.push("Speed-Up");
                             setTimeout(()=>{
                                 this.acc /= 1.5;
-                                this.colordefault = "green";
+                                let delI = POWERUPS.findIndex((v)=>{v === "Speed-Up"});
+                                POWERUPS.splice(delI,1);     
                                 
-                            },10000)
+                            },5000)
                             break;
                         case "nospeed":
                             v.randomtype()
                             this.acc /= 1.5;
-                            this.colordefault = "#6a6a16";
+                            POWERUPS.push("Speed-Down");
                             setTimeout(()=>{
                                 this.acc *= 1.5;
-                                this.colordefault = "green";
+                                let delI = POWERUPS.findIndex((v)=>{v === "Speed-Down"});
+                                POWERUPS.splice(delI,1);  
                                 
-                            },10000)
+                            },5000)
                             break;
                         case "bigbutt":
                             v.randomtype()
@@ -417,8 +423,8 @@ class snake{
 
         // calculate sides
 
-        this.sides.left = {x:this.x -Math.cos(this.dir+Math.PI/2)*this.size, y:this.y - Math.sin(this.dir+Math.PI/2)*this.size};
-        this.sides.right = {x:this.x +Math.cos(this.dir+Math.PI/2)*this.size,y:this.y + Math.sin(this.dir+Math.PI/2)*this.size};
+        this.sides.left = {x:this.x -Math.cos(this.dir+PI/2)*this.size, y:this.y - Math.sin(this.dir+PI/2)*this.size};
+        this.sides.right = {x:this.x +Math.cos(this.dir+PI/2)*this.size,y:this.y + Math.sin(this.dir+PI/2)*this.size};
 
 
 
@@ -430,8 +436,8 @@ class snake{
         ctx.beginPath();
         ctx.strokeStyle = "black";
         if(BODIES.length>0){
-        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir - Math.PI/2,this.dir + Math.PI*1/2)}else{
-        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,Math.PI*2)
+        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir - PI/2,this.dir + PI*1/2)}else{
+        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,PI*2)
         }
         ctx.fillStyle = this.color;
         ctx.fill()
@@ -449,13 +455,13 @@ class snake{
         // text
 
         ctx.strokeStyle = "black";
-        ctx.strokeText( "Speed : "+this.speed.toFixed(2), 5, 10);
-        ctx.strokeText("Boost : "+Math.round(this.speedboost), 5, 50);
-        ctx.strokeText("Length : "+Math.round(this.snakelength), 5, 30);
+        ctx.strokeText( "Speed : "+this.speed.toFixed(2), 5, 20);
+        ctx.strokeText("Boost : "+Math.round(this.speedboost), 5, 60);
+        ctx.strokeText("Length : "+Math.round(this.snakelength), 5, 40);
         if(debug){
-            ctx.strokeText("dirv : "+this.dir_v, 5, 70);
-            ctx.strokeText("POS : "+this.POSITIONS.length, 5, 90);
-            ctx.strokeText("nocolbod : "+ this.nocolbod, 5, 110);
+            ctx.strokeText("dirv : "+this.dir_v, 5, 80);
+            ctx.strokeText("POS : "+this.POSITIONS.length, 5, 100);
+            ctx.strokeText("nocolbod : "+ this.nocolbod, 5, 120);
         }
 
     }
@@ -585,6 +591,11 @@ ctx.lineWidth = 1;
 // end of smooth body
 
 
+
+ctx.strokeStyle = "black";
+for(let i = 0;i<POWERUPS.length;i++){
+    ctx.strokeText(POWERUPS[i], 100, i+1 * 20 );
+}
 
 }
 
