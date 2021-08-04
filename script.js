@@ -119,7 +119,7 @@ class food{
                 break;
             case "bigbutt":
                 this.size = 12;
-                this.color = "brown";
+                this.color = "lightgreen";
                 break;
             case "tempgrow":
                 this.size = 8;
@@ -148,6 +148,7 @@ class body{
 
         this.x = x;
         this.y = y;
+        this.dir = 0;
         this.sizedefault = size;
         this.size = this.sizedefault;
         this.color = color;
@@ -156,6 +157,7 @@ class body{
         this.eating = false;
         this.delayeat = false;
         this.visbile = visbile
+        this.sides = {left:0,right:0}
     }
 
     update(bodyI = 0){
@@ -164,6 +166,7 @@ class body{
 
             this.x = snake1.POSITIONS[i].x;
             this.y = snake1.POSITIONS[i].y;
+            this.dir = snake1.POSITIONS[i].dir + Math.PI/2;
             if(distance(this.x,this.parent.x,this.y,this.parent.y) > this.size+this.parent.size){
                 this.bodypos = snake1.POSITIONS.length-1-i;
                 break;
@@ -181,11 +184,11 @@ class body{
                     this.eating = true;
                     this.delayeat = false;
                     
-                }, 100);
+                }, 10);
         }else{this.visbile = true;}}
 
         if(this.delayeat){
-            this.size = this.sizedefault +2;
+            this.size = this.sizedefault +3;
         }else{
             this.size = this.sizedefault;
         }
@@ -193,25 +196,42 @@ class body{
         if(bodyI !== BODIES.length-1 && !this.visbile ){this.visbile = true}
 
 
+        // calculate sides
+
+        this.sides.left = {x:this.x -Math.cos(this.dir)*this.size, y:this.y - Math.sin(this.dir)*this.size};
+        this.sides.right = {x:this.x +Math.cos(this.dir)*this.size,y:this.y + Math.sin(this.dir)*this.size};
+
+
     }
 
 
-    render(){
+    render(end){
+
+        
 
         if(this.visbile){
         ctx.beginPath();
         ctx.strokeStyle = "black";
-        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0, 2 * Math.PI);
+
+        if(BODIES.length>0 && end){
+            ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir ,this.dir + Math.PI)}else{
+            ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,Math.PI*2)
+            }
+
         ctx.fillStyle = this.color ;
         ctx.fill();
-        ctx.stroke(); }
+        ctx.stroke(); 
+    }
         
 
     }
 
     shrinkToParent(){
-
-        this.size = this.parent.size *0.99;
+        if(this.parent.bodypos === 0){
+        this.sizedefault = this.parent.size *0.99;}
+        else{
+        this.sizedefault = this.parent.sizedefault *0.99;
+        }
     }
 
 
@@ -234,19 +254,21 @@ class snake{
         this.size = size;
         this.snakelength = 0;
         this.speedboost = 300;
-        this.colordefault = "green";
+        this.colordefault = "lightgreen";
         this.color = this.colordefault;
         this.POSITIONS = []; 
         this.bodypos = 0;  
         this.nocolbod = false;    
         this.eating = false;
+        this.sides = {left:0,right:0}
+
 
     }
 
     update(){
 
         
-        this.POSITIONS.push({x:this.x,y:this.y}); 
+        this.POSITIONS.push({x:this.x,y:this.y,dir:this.dir}); 
         
 
         this.x += Math.cos(this.dir)*this.speed;
@@ -277,12 +299,9 @@ class snake{
             this.color = "darkgreen";
         }
         
-        
+        // walls collision
 
-        if(this.x < 0){this.x = canvas.width}
-        if(this.x > canvas.width){this.x = 0}
-        if(this.y < 0){this.y = canvas.height}
-        if(this.y > canvas.height){this.y = 0}
+        if(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height){location.reload();}
             
         
 
@@ -320,27 +339,27 @@ class snake{
                             break;
                         case "speed":
                             v.randomtype()
-                            this.acc *=2;
+                            this.acc *=1.5;
                             this.colordefault = "red";
                             setTimeout(()=>{
-                                this.acc /= 2;
+                                this.acc /= 1.5;
                                 this.colordefault = "green";
                                 
                             },10000)
                             break;
                         case "nospeed":
                             v.randomtype()
-                            this.acc /= 2;
+                            this.acc /= 1.5;
                             this.colordefault = "#6a6a16";
                             setTimeout(()=>{
-                                this.acc *= 2;
+                                this.acc *= 1.5;
                                 this.colordefault = "green";
                                 
                             },10000)
                             break;
                         case "bigbutt":
                             v.randomtype()
-                            BODIES[BODIES.length-1].size += 4;
+                            BODIES[BODIES.length-1].sizedefault += 4;
                             break;
                         case "tempgrow":
                             FOODS.splice(i,1);
@@ -374,7 +393,7 @@ class snake{
                 let bodydistance = distance(this.x,v.x,this.y,v.y);
                 if (bodydistance < this.size+v.size){
                     
-                    window.location.reload(true)
+                    location.reload();
 
                 }
                 }
@@ -396,6 +415,11 @@ class snake{
         }}
         
 
+        // calculate sides
+
+        this.sides.left = {x:this.x -Math.cos(this.dir+Math.PI/2)*this.size, y:this.y - Math.sin(this.dir+Math.PI/2)*this.size};
+        this.sides.right = {x:this.x +Math.cos(this.dir+Math.PI/2)*this.size,y:this.y + Math.sin(this.dir+Math.PI/2)*this.size};
+
 
 
     }
@@ -405,7 +429,10 @@ class snake{
 
         ctx.beginPath();
         ctx.strokeStyle = "black";
-        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0, 2 * Math.PI);
+        if(BODIES.length>0){
+        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir - Math.PI/2,this.dir + Math.PI*1/2)}else{
+        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,Math.PI*2)
+        }
         ctx.fillStyle = this.color;
         ctx.fill()
         ctx.stroke(); 
@@ -418,6 +445,8 @@ class snake{
         ctx.stroke();
         ctx.lineWidth = 1; 
 
+
+        // text
 
         ctx.strokeStyle = "black";
         ctx.strokeText( "Speed : "+this.speed.toFixed(2), 5, 10);
@@ -470,8 +499,8 @@ if(snake1.snakelength !== BODIES.length){
     if(snake1.snakelength < 2){
 
         const new_body = new body(0,0,10,"lightgreen",snake1,true)
-        BODIES.push(new_body);
         new_body.shrinkToParent();
+        BODIES.push(new_body);
 
     }else{
         addbody(false);
@@ -488,24 +517,74 @@ BODIES.forEach((v,i)=>{v.update(i);})
 function render(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height)
+
 snake1.render();
-
 FOODS.forEach((v)=>{v.render();})
-BODIES.forEach((v)=>{v.render();})
 
+
+if(BODIES.length > 0){
+    let lastbody = BODIES[BODIES.length-1];
+    if(lastbody.visbile){
+    lastbody.render(true);
+    }else{
+    BODIES[BODIES.length-2].render(true);
+    }
+    
+
+}
+
+
+// debug  POSITION line
 
 if(debug){
 ctx.beginPath();
-snake1.POSITIONS.forEach((v,i)=>{
-        if (i === 0){
-            ctx.moveTo(v.x,v.y);
-        }else{
-            ctx.lineTo(v.x,v.y);
-        }
-
-
-})
+ctx.moveTo(snake1.POSITIONS[0].x,snake1.POSITIONS[0].y);
+snake1.POSITIONS.forEach((v,i)=>{ctx.lineTo(v.x,v.y);})
 ctx.stroke()}
+
+
+// smooth body 
+
+if(BODIES.length>0){
+ctx.fillStyle = "lightgreen"
+ctx.strokeStyle = "black";
+ctx.lineJoin = "round";
+ctx.beginPath();
+ctx.moveTo(snake1.sides.left.x,snake1.sides.left.y);
+BODIES.forEach(v=>{if(v.visbile){ctx.lineTo(v.sides.left.x,v.sides.left.y)}})
+BODIES.slice().reverse().forEach(v=>{if(v.visbile){ctx.lineTo(v.sides.right.x,v.sides.right.y)}})
+ctx.lineTo(snake1.sides.right.x,snake1.sides.right.y);
+ctx.fill();
+ctx.stroke();
+
+
+ctx.strokeStyle = "lightgreen";
+ctx.lineWidth = 2;
+
+let lastbody = BODIES[BODIES.length-1];
+if(lastbody.visbile){
+    ctx.beginPath();
+    ctx.moveTo(lastbody.sides.right.x,lastbody.sides.right.y);
+    ctx.lineTo(lastbody.sides.left.x,lastbody.sides.left.y);
+    ctx.stroke();
+}else{
+    ctx.beginPath();
+    ctx.moveTo(BODIES[BODIES.length-2].sides.right.x,BODIES[BODIES.length-2].sides.right.y);
+    ctx.lineTo(BODIES[BODIES.length-2].sides.left.x,BODIES[BODIES.length-2].sides.left.y);
+    ctx.stroke();
+}
+
+
+
+ctx.lineJoin="miter";
+ctx.lineWidth = 1;
+
+
+}
+
+// end of smooth body
+
+
 
 }
 
@@ -527,12 +606,14 @@ function addbody(visbile){
 
 }
 
-
+//random num
 
 function randomrange(min, max) { 
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+
+//toggles
 
 function togglePause(){
     let menudiv = document.getElementById("pausemenu");
@@ -585,9 +666,12 @@ function keybindcheck(key){return KEYS[key]}
 
 function setkeybindbtn(btn){
     btn.innerHTML = "Press a Key"
-    btn.addEventListener("keypress",e=>{
+    btn.addEventListener("keydown",e=>{
         btn.innerHTML  = e.key ;
         KEYBINDS[btn.parentElement.value] = [];
+        console.log(KEYBINDS[btn.parentElement.value].findindex(v=>{
+            return v === e.key;
+        }))
         KEYBINDS[btn.parentElement.value].push(e.key );
     });
     
@@ -598,7 +682,7 @@ function setkeybindbtn(btn){
 
 
 addEventListener("keydown", e => {
-    console.log("key: ",e.key);
+    // console.log("key: ",e.key);
     KEYS[e.key] = true;
 });
 
