@@ -30,16 +30,23 @@ const KEYBINDS = {
 for(let action in KEYBINDS){
     let parent = document.getElementById('keybindmenu');
     let div = document.createElement('div');
-    div.innerHTML = action + ": ";
+    div.innerHTML = action + " :";
     div.value = action ;
     div.classList.add("Keybinddiv");
     parent.appendChild(div);
+
+
     let button = document.createElement('button');
     button.innerHTML = KEYBINDS[action][0];
-    button.value = 0 ;
-    button.classList.add("menubtn");
+    button.classList.add("keybindbtn");
     button.addEventListener("click", ()=>{setkeybindbtn(button)});
     div.appendChild(button);
+
+    let array = document.createElement('input');
+    array.value = KEYBINDS[action]
+    array.disabled = true;
+    // textarea.classList.add("menubtn");
+    div.appendChild(array);
 
     // typeoption.value = v.name;
 
@@ -50,9 +57,12 @@ const SPAWNFOOD = ["grow","grow","grow","grow","randomgrow","randomgrow","random
 
 const POWERUPS = [];
 
+const fart = new Audio("fart.mp3"); 
+let playfarts = false;
+
 let menu = false;
-
-
+let smoothsnakemode = true;
+let rgbmode = false;
 // food class
 
 class food{
@@ -123,7 +133,7 @@ class food{
                 break;
             case "bigbutt":
                 this.size = 12;
-                this.color = "lightgreen";
+                this.color = "green";
                 break;
             case "tempgrow":
                 this.size = 8;
@@ -148,15 +158,15 @@ class food{
 class body{
 
 
-    constructor(x,y,size,color,parent,visbile){
+    constructor(x,y,size,parent,visbile){
 
         this.x = x;
         this.y = y;
         this.dir = 0;
         this.sizedefault = size;
         this.size = this.sizedefault;
-        this.color = color;
         this.parent = parent;
+        this.color = this.parent.color;
         this.bodypos = 0;
         this.eating = false;
         this.delayeat = false;
@@ -165,6 +175,8 @@ class body{
     }
 
     update(bodyI = 0){
+
+        // moving the body to the tail
 
         for(let i= snake1.POSITIONS.length-1-this.parent.bodypos; i>0 ;i--){
 
@@ -188,11 +200,11 @@ class body{
                     this.eating = true;
                     this.delayeat = false;
                     
-                }, 10);
+                }, 30);
         }else{this.visbile = true;}}
 
         if(this.delayeat){
-            this.size = this.sizedefault +3;
+            this.size = this.sizedefault +4;
         }else{
             this.size = this.sizedefault;
         }
@@ -206,6 +218,9 @@ class body{
         this.sides.right = {x:this.x +Math.cos(this.dir)*this.size,y:this.y + Math.sin(this.dir)*this.size};
 
 
+        // color
+
+        this.color = this.parent.color;
     }
 
 
@@ -258,7 +273,8 @@ class snake{
         this.size = size;
         this.snakelength = 0;
         this.speedboost = 300;
-        this.colordefault = "lightgreen";
+        this.hue = 126
+        this.colordefault = "hsl("+this.hue +", 59%, 61%)"
         this.color = this.colordefault;
         this.POSITIONS = []; 
         this.bodypos = 0;  
@@ -271,7 +287,9 @@ class snake{
 
     update(){
 
+        if(rgbmode){this.hue ++; this.colordefault = "hsl("+this.hue +", 59%, 61%)";}
         
+
         this.POSITIONS.push({x:this.x,y:this.y,dir:this.dir}); 
         
 
@@ -300,7 +318,6 @@ class snake{
         if( KEYBINDS["Boost"].some(keybindcheck) && this.speedboost >10 || touch=== "boost" && this.speedboost >10 ){
             this.speed *= 1.03;
             this.speedboost -= 10;
-            this.color = "darkgreen";
         }
         
         // walls collision
@@ -317,6 +334,7 @@ class snake{
 
                 let fooddistance = distance(this.x,v.x,this.y,v.y);
                 if(fooddistance < this.size+v.size){
+                    if(playfarts){fart.play()}
                     switch(v.type){
 
                         case "grow":
@@ -350,7 +368,7 @@ class snake{
                                 let delI = POWERUPS.findIndex((v)=>{v === "Speed-Up"});
                                 POWERUPS.splice(delI,1);     
                                 
-                            },5000)
+                            },10000)
                             break;
                         case "nospeed":
                             v.randomtype()
@@ -361,7 +379,7 @@ class snake{
                                 let delI = POWERUPS.findIndex((v)=>{v === "Speed-Down"});
                                 POWERUPS.splice(delI,1);  
                                 
-                            },5000)
+                            },10000)
                             break;
                         case "bigbutt":
                             v.randomtype()
@@ -376,10 +394,7 @@ class snake{
                             let spawnamount = 5;
                             for(let i = 0;i<spawnamount; i++){
                                 const new_food = new food(0,0,"tempgrow");
-                                FOODS.push(new_food);
-                            }
-
-
+                                FOODS.push(new_food);}
                         default:
                         console.log("wtf are you eating snake?");
                         break;
@@ -430,19 +445,22 @@ class snake{
 
     }
 
-    render(){
+    render(x = false){
         
 
         ctx.beginPath();
         ctx.strokeStyle = "black";
-        if(BODIES.length>0){
-        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir - PI/2,this.dir + PI*1/2)}else{
+        if(BODIES.length>0 && x ){
+        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir - PI/2,this.dir + PI*1/2)}
+        else{
         ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,PI*2)
         }
+
         ctx.fillStyle = this.color;
         ctx.fill()
         ctx.stroke(); 
         
+
         ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.strokeStyle = "darkred";
@@ -462,6 +480,7 @@ class snake{
             ctx.strokeText("dirv : "+this.dir_v, 5, 80);
             ctx.strokeText("POS : "+this.POSITIONS.length, 5, 100);
             ctx.strokeText("nocolbod : "+ this.nocolbod, 5, 120);
+            ctx.strokeText("acceleration : "+ this.acc, 5, 140);
         }
 
     }
@@ -504,7 +523,7 @@ if(snake1.snakelength !== BODIES.length){
 
     if(snake1.snakelength < 2){
 
-        const new_body = new body(0,0,10,"lightgreen",snake1,true)
+        const new_body = new body(0,0,10,snake1,true)
         new_body.shrinkToParent();
         BODIES.push(new_body);
 
@@ -524,10 +543,18 @@ function render(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height)
 
-snake1.render();
+
+if(smoothsnakemode){
+    snake1.render(true);
+}else{
+    snake1.render(false);
+}
+
+
 FOODS.forEach((v)=>{v.render();})
 
 
+if(smoothsnakemode){
 if(BODIES.length > 0){
     let lastbody = BODIES[BODIES.length-1];
     if(lastbody.visbile){
@@ -535,7 +562,8 @@ if(BODIES.length > 0){
     }else{
     BODIES[BODIES.length-2].render(true);
     }
-    
+}}else{
+    BODIES.forEach((v)=>{v.render(false);})
 
 }
 
@@ -551,8 +579,8 @@ ctx.stroke()}
 
 // smooth body 
 
-if(BODIES.length>0){
-ctx.fillStyle = "lightgreen"
+if(BODIES.length>0 && smoothsnakemode){
+ctx.fillStyle = snake1.color;
 ctx.strokeStyle = "black";
 ctx.lineJoin = "round";
 ctx.beginPath();
@@ -564,7 +592,7 @@ ctx.fill();
 ctx.stroke();
 
 
-ctx.strokeStyle = "lightgreen";
+ctx.strokeStyle = snake1.color;
 ctx.lineWidth = 2;
 
 let lastbody = BODIES[BODIES.length-1];
@@ -581,7 +609,7 @@ if(lastbody.visbile){
 }
 
 
-
+ctx.strokeStyle = "black";
 ctx.lineJoin="miter";
 ctx.lineWidth = 1;
 
@@ -592,7 +620,7 @@ ctx.lineWidth = 1;
 
 
 
-ctx.strokeStyle = "black";
+
 for(let i = 0;i<POWERUPS.length;i++){
     ctx.strokeText(POWERUPS[i], 100, i+1 * 20 );
 }
@@ -611,7 +639,7 @@ return Math.sqrt(((x2-x1)**2)+((y2-y1)**2));
 
 function addbody(visbile){
 
-    const new_body = new body(0,0,10,"lightgreen",BODIES[BODIES.length-1],visbile);
+    const new_body = new body(0,0,10,BODIES[BODIES.length-1],visbile);
     new_body.shrinkToParent();
     BODIES.push(new_body);
 
@@ -631,6 +659,8 @@ function togglePause(){
 
     let keybind = document.getElementById("keybindmenu");
     keybind.style.display = "none";
+    let settings = document.getElementById("settingsmenu");
+    settings.style.display = "none";
 
     if(GameSpeed === 0){
         GameSpeed = lastGameSpeed; 
@@ -648,18 +678,28 @@ function togglePause(){
 
 }
 
-function toggledebug(){
 
+function toggledebug(){
+    
     if(debug){
-        debug= false;
+        debug = false;
     }else{
         debug = true;
     }
 }
 
-function toggleKeybind(){
+function togglesnakestyle(){
+    
+    if(smoothsnakemode){
+        smoothsnakemode = false;
+    }else{
+        smoothsnakemode = true;
+    }
+}
 
-    let keybind = document.getElementById("keybindmenu");
+function toggleMenu(id){
+
+    let keybind = document.getElementById(id);
     if(keybind.style.display==="flex"){
         keybind.style.display = "none";
     }else{
@@ -667,6 +707,8 @@ function toggleKeybind(){
 
     }
 }
+
+
 
 
 // check if is keybind
@@ -679,14 +721,34 @@ function setkeybindbtn(btn){
     btn.innerHTML = "Press a Key"
     btn.addEventListener("keydown",e=>{
         btn.innerHTML  = e.key ;
-        KEYBINDS[btn.parentElement.value] = [];
-        console.log(KEYBINDS[btn.parentElement.value].findindex(v=>{
-            return v === e.key;
-        }))
-        KEYBINDS[btn.parentElement.value].push(e.key );
-    });
+        let keyI = KEYBINDS[btn.parentElement.value].findIndex(v=>{return v === e.key;})
+        if(keyI === -1){
+            KEYBINDS[btn.parentElement.value].push(e.key );
+        }else{
+            KEYBINDS[btn.parentElement.value].splice(keyI,1);
+        }
+
+        btn.parentElement.lastChild.value = KEYBINDS[btn.parentElement.value];
+
+       
+    }, {once: true});
     
     
+}
+
+// reset
+
+function resetKeybinds(){
+    KEYBINDS.Left = ["a"];
+    KEYBINDS.Right = ["d"];
+    KEYBINDS.Boost = ["w"];
+
+    let Keybinddiv = document.getElementById("keybindmenu");
+    for(let i = 3;i< Keybinddiv.children.length; i++){
+        console.log(Keybinddiv.children[i].childNodes[2]);
+        Keybinddiv.children[i].childNodes[2].value = KEYBINDS[Keybinddiv.children[i].value];
+    }
+
 }
 
 

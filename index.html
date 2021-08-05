@@ -17,24 +17,50 @@
 <button class="menubutton" onclick=" togglePause();"> Menu </button>
 
 
-<div id="pausemenu" class="pausemenu"> 
+<div id="pausemenu" class="menu"> 
 
 <h1> Menu </h1>
 <button class="X" onclick=" togglePause();">X</button>
-<button class="menubtn" onclick=" toggleKeybind();">Change Keybinds</button>
-<button class="menubtn" onclick=" toggledebug(); render();" >Toggle Debug Mode</button>
+<button class="menubtn" onclick=" togglePause();">Continue</button>
+<button class="menubtn" onclick="  location.reload();">Restart</button>
+<button class="menubtn" onclick=" toggleMenu('settingsmenu');" >Settings</button>
+<button class="menubtn" onclick=" toggleMenu('keybindmenu');">Change Keybinds</button>
+<button class="menubtn" onclick=" toggleMenu('funnymenu');" >Funny Menu</button>
+<button class="menubtn" onclick="  window.close(); ">Exit</button>
 
-<button class="menubtn" onclick="snake1.acc = 2" >Crazy Mode</button>
+
 
 </div>
 
-<div id="keybindmenu" class="keybindmenu"> 
+<div id="keybindmenu" class="menu"> 
 
     <h1>Keybind Menu </h1>
-    <button class="X" onclick=" toggleKeybind();">X</button>
+    <button onclick="resetKeybinds();">Reset Keybinds</button>
+    <button class="X" onclick=" toggleMenu('keybindmenu');;">X</button>
+
+</div>
+
+<div id="funnymenu" class="menu"> 
+
+    <h1>Funny Menu </h1>
+    <button class="X" onclick=" toggleMenu('funnymenu');;">X</button>
+    <button class="menubtn" onclick=" toggledebug(); render();" >Toggle Debug Mode</button>
+    <button class="menubtn" onclick="snake1.acc += 1; render();">Increase Speed</button>
+    <button class="menubtn" onclick="if(BODIES.length > 0){BODIES[BODIES.length-1].sizedefault += 5; render();}">Increase Butt</button>
+    <button class="menubtn" onclick=" if(playfarts){playfarts = false;}else{playfarts = true;} " >Toggle Funny sound</button>
+    <button class="menubtn" onclick=" if(rgbmode){rgbmode = false;}else{rgbmode = true;} " >Toggle RGB mode</button>
 
 
-    </div>
+</div>
+
+<div id="settingsmenu" class="menu"> 
+
+    <h1>Settings </h1>
+    <button class="X" onclick=" toggleMenu('settingsmenu');">X</button>
+    <button class="menubtn" onclick=" togglesnakestyle(); render();" >Toggle Snake Style</button>
+
+
+</div>
 
 </body>
 

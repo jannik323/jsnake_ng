@@ -36,6 +36,10 @@ button.menubtn{
     min-width: fit-content;
 }
 
+button.keybindbtn{
+    width: fit-content;
+    height: min-content;
+}
 
 button{
     border: 0.25rem ridge black;
@@ -47,27 +51,13 @@ button:hover{
 }
 
 
-div.pausemenu{
+div.menu{
 
     display: none;
     position: absolute;
-    opacity: 0.8;
     flex-direction: column;
     width: 50%;
     height: 50%;
-    border: 1rem ridge black;
-    padding: 1rem;
-    background-color: white;
-
-}
-
-div.keybindmenu{
-
-    display: none;
-    position: absolute;
-    flex-direction: column;
-    width: 60%;
-    height: 60%;
     border: 1rem ridge black;
     padding: 1rem;
     background-color: white;
@@ -82,8 +72,21 @@ div h1{
 }
 
 div.Keybinddiv{
-    margin-top: 1rem;
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: 20% 30% 50%;
+    grid-template-rows: min-content ;
+    grid-column-gap: 1.5rem;
+
     margin-left: 2rem;
     width: 80%;
     min-width: fit-content;
+    align-items: center;
+    justify-content: center;
+    outline : 0.25rem solid grey;
+    outline-offset: 0.5rem
+}
+
+#color{
+    color: rgb(144,238,144);
 }
