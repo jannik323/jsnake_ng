@@ -107,7 +107,7 @@ if (localStorage.smoothsnakemode) {
     }
     
 }else{
-    localStorage.smoothsnakemode = 1;
+    localStorage.smoothsnakemode = true;
     smoothsnakemode = true;
 }
 
