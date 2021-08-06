@@ -83,7 +83,7 @@ let button = document.createElement('button');
 
 // end of making shit for html
 
-const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow"]
+const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow","boost","ghost","speed","randomgrow","spawn","randomgrow"]
 const SPAWNFOOD = ["grow","grow","grow","grow","randomgrow","randomgrow","randomgrow"];
 
 const POWERUPS = [];
@@ -92,6 +92,8 @@ const fart = new Audio("fart.mp3");
 let playfarts = false;
 let menu = false;
 let rgbmode = false;
+let highscore = localStorage.getItem("highscore"); 
+let score = 0;
 
 // local storage
 
@@ -182,7 +184,7 @@ class food{
                 break;
             case "bigbutt":
                 this.size = 12;
-                this.color = "green";
+                this.color = "brown";
                 break;
             case "tempgrow":
                 this.size = 8;
@@ -384,6 +386,8 @@ class snake{
                 let fooddistance = distance(this.x,v.x,this.y,v.y);
                 if(fooddistance < this.size+v.size){
                     if(playfarts){fart.play()}
+                    score++;
+                    if(score>highscore){localStorage.setItem("highscore", score); highscore=score;}
                     switch(v.type){
 
                         case "grow":
@@ -524,13 +528,15 @@ class snake{
 
         ctx.strokeStyle = "black";
         ctx.strokeText( "Speed : "+this.speed.toFixed(2), 5, 20);
-        ctx.strokeText("Boost : "+Math.round(this.speedboost), 5, 60);
         ctx.strokeText("Length : "+Math.round(this.snakelength), 5, 40);
+        ctx.strokeText("Boost : "+Math.round(this.speedboost), 5, 60);
+        ctx.strokeText("Score : "+score, 5, 80);
+        ctx.strokeText("Highscore : "+highscore, 5, 100);
         if(debug){
-            ctx.strokeText("dirv : "+this.dir_v, 5, 80);
-            ctx.strokeText("POS : "+this.POSITIONS.length, 5, 100);
-            ctx.strokeText("nocolbod : "+ this.nocolbod, 5, 120);
-            ctx.strokeText("acceleration : "+ this.acc, 5, 140);
+            ctx.strokeText("dirv : "+this.dir_v, 5, 120);
+            ctx.strokeText("POS : "+this.POSITIONS.length, 5, 140);
+            ctx.strokeText("nocolbod : "+ this.nocolbod, 5, 160);
+            ctx.strokeText("acceleration : "+ this.acc, 5, 180);
         }
 
     }
@@ -672,7 +678,7 @@ ctx.lineWidth = 1;
 
 
 for(let i = 0;i<POWERUPS.length;i++){
-    ctx.strokeText(POWERUPS[i], 100, i+1 * 20 );
+    ctx.strokeText(POWERUPS[i], 100, (i+1) * 20 );
 }
 
 }
@@ -726,6 +732,13 @@ function togglePause(){
 
     
 
+}
+
+function Pause(){
+    let menudiv = document.getElementById("pausemenu");
+    GameSpeed = 0; 
+    menu = true;
+    menudiv.style.display = "flex";
 }
 
 
