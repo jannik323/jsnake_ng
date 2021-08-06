@@ -805,7 +805,7 @@ function setkeybindbtn(btn){
 
 // reset
 
-function resetKeybinds(Left = ["a","q"],Right = ["d"],Boost = ["w"]){
+function resetKeybinds(Left = ["a"],Right = ["d"],Boost = ["w"]){
     KEYBINDS.Left = Left
     KEYBINDS.Right = Right
     KEYBINDS.Boost = Boost
