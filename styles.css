@@ -87,6 +87,7 @@ div.Keybinddiv{
     outline-offset: 0.5rem
 }
 
-#color{
-    color: rgb(144,238,144);
+button.margin-top{
+    margin-top: 2.5rem;
+
 }

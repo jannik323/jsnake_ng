@@ -15,16 +15,38 @@ let debug = false;
 
 const PI = Math.PI;
 
+
+// local storage keybinds
 const KEYBINDS = {
 
-    Left:["a"],
-    Right:["d"],
-    Boost:["w"],   
-
-
-
+    Left:[],
+    Right:[],
+    Boost:[],   
 
 }
+
+if (localStorage.keybinds) {
+    let actions = localStorage.keybinds.split(" ");
+    actions.forEach((v,i)=>{
+        
+        actions[i] = v.split(",");
+        
+    });
+
+    console.log(actions)
+    resetKeybinds(actions[0],actions[1],actions[2]);
+    savekeybinds()
+}else{
+    resetKeybinds();
+    savekeybinds()
+    
+}
+
+
+
+
+
+
  // make butttons for keybinds in menu
 
 for(let action in KEYBINDS){
@@ -51,6 +73,15 @@ for(let action in KEYBINDS){
     // typeoption.value = v.name;
 
 }
+let parent = document.getElementById('keybindmenu');
+let button = document.createElement('button');
+    button.innerHTML = "Save Keyinds"
+    button.classList.add("menubtn","margin-top");
+    button.addEventListener("click", ()=>{savekeybinds()});
+    parent.appendChild(button);
+
+
+// end of making shit for html
 
 const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow"]
 const SPAWNFOOD = ["grow","grow","grow","grow","randomgrow","randomgrow","randomgrow"];
@@ -59,10 +90,28 @@ const POWERUPS = [];
 
 const fart = new Audio("fart.mp3"); 
 let playfarts = false;
-
 let menu = false;
-let smoothsnakemode = true;
 let rgbmode = false;
+
+// local storage
+
+let smoothsnakemode;
+if (localStorage.smoothsnakemode) {
+
+    if(localStorage.smoothsnakemode === "true"){
+        smoothsnakemode = true;
+    }else{
+        smoothsnakemode = false;
+    }
+    
+}else{
+    localStorage.smoothsnakemode = 1;
+    smoothsnakemode = true;
+}
+
+
+
+
 // food class
 
 class food{
@@ -395,6 +444,7 @@ class snake{
                             for(let i = 0;i<spawnamount; i++){
                                 const new_food = new food(0,0,"tempgrow");
                                 FOODS.push(new_food);}
+                            break;
                         default:
                         console.log("wtf are you eating snake?");
                         break;
@@ -692,8 +742,12 @@ function togglesnakestyle(){
     
     if(smoothsnakemode){
         smoothsnakemode = false;
+        localStorage.smoothsnakemode = false;
+
     }else{
         smoothsnakemode = true;
+        localStorage.smoothsnakemode = true;
+
     }
 }
 
@@ -738,10 +792,10 @@ function setkeybindbtn(btn){
 
 // reset
 
-function resetKeybinds(){
-    KEYBINDS.Left = ["a"];
-    KEYBINDS.Right = ["d"];
-    KEYBINDS.Boost = ["w"];
+function resetKeybinds(Left = ["a","q"],Right = ["d"],Boost = ["w"]){
+    KEYBINDS.Left = Left
+    KEYBINDS.Right = Right
+    KEYBINDS.Boost = Boost
 
     let Keybinddiv = document.getElementById("keybindmenu");
     for(let i = 3;i< Keybinddiv.children.length; i++){
@@ -751,6 +805,19 @@ function resetKeybinds(){
 
 }
 
+
+// save keybinds
+
+function savekeybinds(){
+
+    let keystring = "" ;
+    for(let a in KEYBINDS){
+        keystring = keystring + " "+ KEYBINDS[a].toString(); 
+    }
+    keystring = keystring.slice(1);
+    console.log("save key: '"+ keystring+ "'")
+    localStorage.keybinds = keystring;
+}
 
 
 
