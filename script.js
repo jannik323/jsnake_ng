@@ -323,9 +323,12 @@ class snake{
         this.dir_v = 0;
         this.size = size;
         this.snakelength = 0;
-        this.speedboost = 300;
-        this.hue = 126
-        this.colordefault = "hsl("+this.hue +", 59%, 61%)"
+        this.speedboost = 600;
+        this.hue = 126;
+        this.lightness = 50;
+        this.lightnessdefault = this.lightness;
+        this.saturation = 59;
+        this.colordefault = "hsl("+this.hue +", "+ this.saturation+ "%, "+this.lightness +"%)"
         this.color = this.colordefault;
         this.POSITIONS = []; 
         this.bodypos = 0;  
@@ -338,8 +341,10 @@ class snake{
 
     update(){
 
-        if(rgbmode){this.hue ++; this.colordefault = "hsl("+this.hue +", 59%, 61%)";}
-        
+        if(rgbmode){this.hue ++; }
+        this.setcolor();
+        this.lightness = this.lightnessdefault;
+
 
         this.POSITIONS.push({x:this.x,y:this.y,dir:this.dir}); 
         
@@ -348,27 +353,25 @@ class snake{
         this.y += Math.sin(this.dir)*this.speed;
         this.dir += this.dir_v;
         this.speed *= 0.9;
-        this.dir_v *= 0.84;
-        this.color = this.colordefault;
-        if(this.speedboost < 300){this.speedboost += 1;}
+        this.dir_v *= 0.8;
+        if(this.speedboost < 600){this.speedboost += 3;}
         this.speed += this.acc;
 
 
         if( KEYBINDS["Left"].some(keybindcheck) || touch === "left"){
-            this.dir_v -= 0.05;
-            this.speed *= 1 + Math.abs(this.dir_v)/5;
+            this.dir_v -= 0.025;
+            this.speed *= 1 + Math.abs(this.dir_v)/2;
         }
 
-                        // if(this.dir_v <0){this.dir_v += 0.1}
-
         if( KEYBINDS["Right"].some(keybindcheck) || touch === "right" ){
-            this.dir_v += 0.05;
-            this.speed *= 1 + Math.abs(this.dir_v)/5;
+            this.dir_v += 0.025;
+            this.speed *= 1 + Math.abs(this.dir_v)/2;
         }
 
         if( KEYBINDS["Boost"].some(keybindcheck) && this.speedboost >10 || touch=== "boost" && this.speedboost >10 ){
             this.speed *= 1.03;
             this.speedboost -= 10;
+            this.lightness +=  20;
         }
         
         // walls collision
@@ -406,29 +409,35 @@ class snake{
                             v.randomtype()
                             this.nocolbod = true;
                             POWERUPS.push("Ghost");
+                            this.saturation -= 50;
                             setTimeout(()=>{
                                 this.nocolbod = false;
                                 let delI = POWERUPS.findIndex((v)=>{v === "Ghost"});
-                                POWERUPS.splice(delI,1);                                
+                                POWERUPS.splice(delI,1);    
+                                this.saturation += 50;                            
                             },10000)
                             break;
                         case "speed":
                             v.randomtype()
                             this.acc *=1.5;
                             POWERUPS.push("Speed-Up");
+                            this.lightnessdefault += 20;
                             setTimeout(()=>{
                                 this.acc /= 1.5;
                                 let delI = POWERUPS.findIndex((v)=>{v === "Speed-Up"});
-                                POWERUPS.splice(delI,1);     
+                                POWERUPS.splice(delI,1);   
+                                this.lightnessdefault -= 20;  
                                 
                             },10000)
                             break;
                         case "nospeed":
                             v.randomtype()
                             this.acc /= 1.5;
+                            this.lightnessdefault -= 20;
                             POWERUPS.push("Speed-Down");
                             setTimeout(()=>{
                                 this.acc *= 1.5;
+                                this.lightnessdefault += 20;
                                 let delI = POWERUPS.findIndex((v)=>{v === "Speed-Down"});
                                 POWERUPS.splice(delI,1);  
                                 
@@ -541,26 +550,41 @@ class snake{
 
     }
 
+    setcolor(){
+        this.colordefault = "hsl("+this.hue +", "+ this.saturation+ "%, "+this.lightness +"%)";
+        this.color = this.colordefault;
+
+    }
+
 }
-
-
 
 // make snake , food , body
 
-const snake1 = new snake(canvas.width/2,canvas.height/2,0,0.5,10)
+const snake1 = new snake(canvas.width/2,canvas.height/2,0,0.25,10)
 
 for(let i = 0; i< SPAWNFOOD.length; i++){
 const new_food = new food(0,0,SPAWNFOOD[i]);
 FOODS.push(new_food);
 }
 
+// snake color save local 
+
+if (localStorage.snake1color) {
+
+    snake1.hue = Number(localStorage.snake1color);
+}else{
+    localStorage.snake1color = 126;
+    snake1.hue = 126;
+}
+
+
 // game loop 
 
 window.requestAnimationFrame(main); 
 
 let lastRenderTime = 0;
-let GameSpeed = 30;
-let lastGameSpeed = 30;
+let GameSpeed = 60;
+let lastGameSpeed = 60;
 
 function main(currentTime){
     window.requestAnimationFrame(main);
@@ -830,6 +854,18 @@ function savekeybinds(){
     keystring = keystring.slice(1);
     console.log("save key: '"+ keystring+ "'")
     localStorage.keybinds = keystring;
+}
+
+
+// snake color
+
+function setsnakecolor(){
+
+let snakecolorinput = document.getElementById("snakecolor");
+snake1.hue = Number(snakecolorinput.value);
+localStorage.snake1color = snake1.hue
+snake1.setcolor();
+render();
 }
 
 
