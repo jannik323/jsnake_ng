@@ -11,6 +11,7 @@ body, html {
 }
 canvas {
     position:absolute;
+    z-index: -2;
 }
 
 button.menubutton{
@@ -19,6 +20,7 @@ button.menubutton{
     top: 1rem;
     right: 1rem;
     opacity: 0.5;
+    font-size: 2rem;
 
 }
 
@@ -31,9 +33,16 @@ button.X{
 
 button.menubtn{
     margin-top: 1rem;
-    margin-left: 2rem;
     width: 33%;
     min-width: fit-content;
+    align-self: center;
+}
+
+input.menubtn{
+    margin-top: 1rem;
+    width: 33%;
+    min-width: fit-content;
+    align-self: center;
 }
 
 button.keybindbtn{
@@ -64,6 +73,25 @@ div.menu{
 
 }
 
+div.group{
+display: flex;
+flex-direction: column;
+margin: 1rem;
+padding: 1rem;
+border: 0.5rem ridge black;
+width: 33%;
+align-self: center;
+
+}
+
+.groupmem{
+    margin-top: 1rem;
+    width: 100%;
+    min-width: fit-content;
+    align-self: center;
+
+}
+
 div h1{
     display: block;
     margin-top: 1rem;
@@ -90,4 +118,13 @@ div.Keybinddiv{
 button.margin-top{
     margin-top: 2.5rem;
 
+}
+
+#boost_bar{
+    width: 3rem;
+    color: blue;
+    position: absolute;
+    opacity: 50%;
+    z-index: -1;
+    
 }

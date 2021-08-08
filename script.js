@@ -6,6 +6,8 @@ canvas.height = window.innerHeight;
 let ctx = canvas.getContext("2d");
 ctx.lineWidth = 1;
 
+let boost_bar = document.getElementById("boost_bar");
+
 const KEYS = {};
 const FOODS = [];
 const BODIES = [];
@@ -83,7 +85,7 @@ let button = document.createElement('button');
 
 // end of making shit for html
 
-const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow","boost","ghost","speed","randomgrow","spawn","randomgrow"]
+const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow","boost","ghost","speed","randomgrow","spawn","randomgrow","randombiggrow"]
 const SPAWNFOOD = ["grow","grow","grow","grow","randomgrow","randomgrow","randomgrow"];
 
 const POWERUPS = [];
@@ -147,8 +149,19 @@ class food{
 
     randomloc(){
 
+        do{
         this.x = randomrange(this.size,canvas.width-this.size);
         this.y = randomrange(this.size,canvas.height-this.size);
+        }
+        while(BODIES.some((v,i)=>{
+        if(distance(v.x,this.x,v.y,this.y) < this.size + v.size){
+            console.log(v,this);
+            return true;  
+        }
+        return false;    
+        }))
+
+
     }
 
     randomtype(){
@@ -161,10 +174,21 @@ class food{
     assigntype(){
 
         switch(this.type){
-            case "randomgrow":
             case "grow":
                 this.size = 8;
-                this.color = "red";
+                this.color = "hsl(0,100%,60%)";
+                break;
+            case "randomgrow":
+                this.size = 8;
+                this.color = "hsl(0,100%,40%)";
+                break;
+            case "tempgrow":
+                this.size = 8;
+                this.color = "hsl(0,100%,20%)";
+                break;
+            case "randombiggrow":
+                this.size = 18;
+                this.color = "hsl(0,100%,60%)";
                 break;
             case "boost":
                 this.size = 7;
@@ -184,11 +208,7 @@ class food{
                 break;
             case "bigbutt":
                 this.size = 12;
-                this.color = "brown";
-                break;
-            case "tempgrow":
-                this.size = 8;
-                this.color = "darkred";
+                this.color = "#6a5333";
                 break;
             case "spawn":
                 this.size = 15;
@@ -217,7 +237,7 @@ class body{
         this.sizedefault = size;
         this.size = this.sizedefault;
         this.parent = parent;
-        this.color = this.parent.color;
+        this.setcolor();
         this.bodypos = 0;
         this.eating = false;
         this.delayeat = false;
@@ -269,9 +289,7 @@ class body{
         this.sides.right = {x:this.x +Math.cos(this.dir)*this.size,y:this.y + Math.sin(this.dir)*this.size};
 
 
-        // color
-
-        this.color = this.parent.color;
+        this.setcolor();
     }
 
 
@@ -303,6 +321,10 @@ class body{
         this.sizedefault = this.parent.sizedefault *0.99;
         }
     }
+    
+    setcolor(){
+        this.color = this.parent.color;
+    }
 
 
 
@@ -328,7 +350,7 @@ class snake{
         this.lightness = 50;
         this.lightnessdefault = this.lightness;
         this.saturation = 59;
-        this.colordefault = "hsl("+this.hue +", "+ this.saturation+ "%, "+this.lightness +"%)"
+        this.colordefault = "hsl("+this.hue +", "+ this.saturation+ "%, "+this.lightness +"%)";
         this.color = this.colordefault;
         this.POSITIONS = []; 
         this.bodypos = 0;  
@@ -354,7 +376,7 @@ class snake{
         this.dir += this.dir_v;
         this.speed *= 0.9;
         this.dir_v *= 0.8;
-        if(this.speedboost < 600){this.speedboost += 3;}
+        if(this.speedboost < 600){this.speedboost += 3; boost_bar.value += 3; boost_bar.max = 600; }
         this.speed += this.acc;
 
 
@@ -371,6 +393,7 @@ class snake{
         if( KEYBINDS["Boost"].some(keybindcheck) && this.speedboost >10 || touch=== "boost" && this.speedboost >10 ){
             this.speed *= 1.03;
             this.speedboost -= 10;
+            boost_bar.value -= 10;
             this.lightness +=  20;
         }
         
@@ -401,9 +424,18 @@ class snake{
                             v.randomtype()
                             this.snakelength += 1;
                             break;
+                        case "randombiggrow":
+                            v.randomtype()
+                            this.snakelength += 2;
+                            score += 4
+                            
+                            break;
                         case "boost":
                             v.randomtype()
                             this.speedboost +=300;
+                            boost_bar.max += 300;
+                            boost_bar.value += 300;
+
                             break;
                         case "ghost":
                             v.randomtype()
@@ -514,7 +546,7 @@ class snake{
         ctx.beginPath();
         ctx.strokeStyle = "black";
         if(BODIES.length>0 && x ){
-        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir - PI/2,this.dir + PI*1/2)}
+        ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, this.dir - (PI/2)-0.1,this.dir + (PI/2)+0.1)}
         else{
         ctx.arc(this.x-this.size/100,this.y-this.size/100, this.size, 0,PI*2)
         }
@@ -526,27 +558,15 @@ class snake{
 
         ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.strokeStyle = "darkred";
+        let tonhue = this.hue - 123;
+        ctx.strokeStyle =  "hsl("+tonhue +", 89%, 19%)";
         ctx.moveTo(this.x,this.y);
         ctx.lineTo(this.x +Math.cos(this.dir)*this.size, this.y + Math.sin(this.dir)*this.size);
         ctx.stroke();
         ctx.lineWidth = 1; 
 
 
-        // text
-
-        ctx.strokeStyle = "black";
-        ctx.strokeText( "Speed : "+this.speed.toFixed(2), 5, 20);
-        ctx.strokeText("Length : "+Math.round(this.snakelength), 5, 40);
-        ctx.strokeText("Boost : "+Math.round(this.speedboost), 5, 60);
-        ctx.strokeText("Score : "+score, 5, 80);
-        ctx.strokeText("Highscore : "+highscore, 5, 100);
-        if(debug){
-            ctx.strokeText("dirv : "+this.dir_v, 5, 120);
-            ctx.strokeText("POS : "+this.POSITIONS.length, 5, 140);
-            ctx.strokeText("nocolbod : "+ this.nocolbod, 5, 160);
-            ctx.strokeText("acceleration : "+ this.acc, 5, 180);
-        }
+        
 
     }
 
@@ -699,11 +719,41 @@ ctx.lineWidth = 1;
 // end of smooth body
 
 
-
+// powerrups
 
 for(let i = 0;i<POWERUPS.length;i++){
     ctx.strokeText(POWERUPS[i], 100, (i+1) * 20 );
 }
+
+// other info
+
+
+rendertexts();
+boost_bar.style.left = snake1.x - 20 + "px";
+boost_bar.style.top = snake1.y - 30 + "px";
+
+}
+
+// render texts
+
+function rendertexts(){
+
+// text
+
+ctx.strokeStyle = "black";
+
+ctx.strokeText( "Speed : "+snake1.speed.toFixed(2), 5, 20);
+ctx.strokeText("Length : "+Math.round(snake1.snakelength), 5, 40);
+ctx.strokeText("Boost : "+Math.round(snake1.speedboost), 5, 60);
+ctx.strokeText("Score : "+score, 5, 80);
+ctx.strokeText("Highscore : "+highscore, 5, 100);
+if(debug){
+    ctx.strokeText("dirv : "+snake1.dir_v, 5, 120);
+    ctx.strokeText("POS : "+snake1.POSITIONS.length, 5, 140);
+    ctx.strokeText("nocolbod : "+ snake1.nocolbod, 5, 160);
+    ctx.strokeText("acceleration : "+ snake1.acc, 5, 180);
+}
+
 
 }
 
@@ -865,6 +915,7 @@ let snakecolorinput = document.getElementById("snakecolor");
 snake1.hue = Number(snakecolorinput.value);
 localStorage.snake1color = snake1.hue
 snake1.setcolor();
+BODIES.forEach(v=>{v.setcolor();})
 render();
 }
 

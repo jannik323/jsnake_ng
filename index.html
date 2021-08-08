@@ -58,12 +58,17 @@
     <h1>Settings </h1>
     <button class="X" onclick=" toggleMenu('settingsmenu');">X</button>
     <button class="menubtn" onclick=" togglesnakestyle(); render();" >Toggle Snake Style</button>
-    <div>
-    <button class="menubtn" onclick="setsnakecolor();">Set Snake Color</button> <input id="snakecolor" placeholder="0-255" class="menubtn">
-    </div>
+
+    <div class="group">
+    <button class="groupmem" onclick="setsnakecolor();">Set Snake Color</button>
+    <input class="groupmem" type="range" min=0 max=256 value = 126 id="snakecolor" placeholder="0-255">
+    </div>  
 
 
 </div>
+
+<progress id="boost_bar" value="600" max="600"></progress>
+
 
 </body>
 
