@@ -393,7 +393,7 @@ class snake{
         
         // walls collision
 
-        if(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height){location.reload();}
+        if(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height){ window.stop(); location.reload(); }
             
         
 
@@ -503,7 +503,7 @@ class snake{
                 let bodydistance = distance(this.x,v.x,this.y,v.y);
                 if (bodydistance < this.size+v.size){
                     
-                    location.reload();
+                    window.stop(); location.reload();
 
                 }
                 }
