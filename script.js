@@ -865,7 +865,7 @@ function setkeybindbtn(btn){
         }
 
         btn.parentElement.lastChild.value = KEYBINDS[btn.parentElement.value];
-        }else{alert("This key cannot be used as a keybind.")}
+        }else{btn.innerHTML = "INVALID KEY"}
        
     }, {once: true});
     
