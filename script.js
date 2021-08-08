@@ -35,7 +35,6 @@ if (localStorage.keybinds) {
         
     });
 
-    console.log(actions)
     resetKeybinds(actions[0],actions[1],actions[2]);
     savekeybinds()
 }else{
@@ -43,10 +42,6 @@ if (localStorage.keybinds) {
     savekeybinds()
     
 }
-
-
-
-
 
 
  // make butttons for keybinds in menu
@@ -77,7 +72,7 @@ for(let action in KEYBINDS){
 }
 let parent = document.getElementById('keybindmenu');
 let button = document.createElement('button');
-    button.innerHTML = "Save Keyinds"
+    button.innerHTML = "Save Keybinds"
     button.classList.add("menubtn","margin-top");
     button.addEventListener("click", ()=>{savekeybinds()});
     parent.appendChild(button);
@@ -85,8 +80,8 @@ let button = document.createElement('button');
 
 // end of making shit for html
 
-const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow","boost","ghost","speed","randomgrow","spawn","randomgrow","randombiggrow"]
-const SPAWNFOOD = ["grow","grow","grow","grow","randomgrow","randomgrow","randomgrow"];
+const FOODTYPES = ["boost","ghost","speed","nospeed","bigbutt","spawn","randomgrow","randomgrow","boost","ghost","speed","randomgrow","spawn","spawn","randomgrow","randombiggrow"]
+const SPAWNFOOD = ["grow","grow","grow","grow","randomgrow","randomgrow","randomgrow","randomgrow"];
 
 const POWERUPS = [];
 
@@ -150,12 +145,11 @@ class food{
     randomloc(){
 
         do{
-        this.x = randomrange(this.size,canvas.width-this.size);
-        this.y = randomrange(this.size,canvas.height-this.size);
+        this.x = randomrange(this.size*3,canvas.width-(this.size*3));
+        this.y = randomrange(this.size*3,canvas.height-(this.size*3));
         }
         while(BODIES.some((v,i)=>{
         if(distance(v.x,this.x,v.y,this.y) < this.size + v.size){
-            console.log(v,this);
             return true;  
         }
         return false;    
@@ -477,7 +471,7 @@ class snake{
                             break;
                         case "bigbutt":
                             v.randomtype()
-                            BODIES[BODIES.length-1].sizedefault += 4;
+                            BODIES[BODIES.length-1].sizedefault += 3;
                             break;
                         case "tempgrow":
                             FOODS.splice(i,1);
@@ -742,16 +736,16 @@ function rendertexts(){
 
 ctx.strokeStyle = "black";
 
-ctx.strokeText( "Speed : "+snake1.speed.toFixed(2), 5, 20);
-ctx.strokeText("Length : "+Math.round(snake1.snakelength), 5, 40);
-ctx.strokeText("Boost : "+Math.round(snake1.speedboost), 5, 60);
-ctx.strokeText("Score : "+score, 5, 80);
-ctx.strokeText("Highscore : "+highscore, 5, 100);
+ctx.strokeText( "Speed : "+snake1.speed.toFixed(2), 10, 20);
+ctx.strokeText("Length : "+Math.round(snake1.snakelength), 10, 40);
+ctx.strokeText("Boost : "+Math.round(snake1.speedboost), 10, 60);
+ctx.strokeText("Score : "+score, 10, 80);
+ctx.strokeText("Highscore : "+highscore, 10, 100);
 if(debug){
-    ctx.strokeText("dirv : "+snake1.dir_v, 5, 120);
-    ctx.strokeText("POS : "+snake1.POSITIONS.length, 5, 140);
-    ctx.strokeText("nocolbod : "+ snake1.nocolbod, 5, 160);
-    ctx.strokeText("acceleration : "+ snake1.acc, 5, 180);
+    ctx.strokeText("dirv : "+snake1.dir_v, 10, 120);
+    ctx.strokeText("POS : "+snake1.POSITIONS.length, 10, 140);
+    ctx.strokeText("nocolbod : "+ snake1.nocolbod, 10, 160);
+    ctx.strokeText("acceleration : "+ snake1.acc, 10, 180);
 }
 
 
@@ -861,6 +855,7 @@ function keybindcheck(key){return KEYS[key]}
 function setkeybindbtn(btn){
     btn.innerHTML = "Press a Key"
     btn.addEventListener("keydown",e=>{
+        if (e.key !== "," && e.key !== " "&& e.key !== "p" ){
         btn.innerHTML  = e.key ;
         let keyI = KEYBINDS[btn.parentElement.value].findIndex(v=>{return v === e.key;})
         if(keyI === -1){
@@ -870,7 +865,7 @@ function setkeybindbtn(btn){
         }
 
         btn.parentElement.lastChild.value = KEYBINDS[btn.parentElement.value];
-
+        }else{alert("This key cannot be used as a keybind.")}
        
     }, {once: true});
     
@@ -886,7 +881,6 @@ function resetKeybinds(Left = ["a"],Right = ["d"],Boost = ["w"]){
 
     let Keybinddiv = document.getElementById("keybindmenu");
     for(let i = 3;i< Keybinddiv.children.length; i++){
-        console.log(Keybinddiv.children[i].childNodes[2]);
         Keybinddiv.children[i].childNodes[2].value = KEYBINDS[Keybinddiv.children[i].value];
     }
 
@@ -902,7 +896,6 @@ function savekeybinds(){
         keystring = keystring + " "+ KEYBINDS[a].toString(); 
     }
     keystring = keystring.slice(1);
-    console.log("save key: '"+ keystring+ "'")
     localStorage.keybinds = keystring;
 }
 
